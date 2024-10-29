@@ -1,12 +1,13 @@
 from ultralytics import YOLO
 import cv2
 from ultralytics.utils.plotting import Annotator  # ultralytics.yolo.utils.plotting is deprecated
-from pprint import pprint
+#from pprint import pprint
 model = YOLO('yolov8n.pt') # x надо поменять на n, x много весит
 
 cap = cv2.VideoCapture(0)
 
-pprint(model.names)
+#pprint(model.names)
+#exit()
 
 cap.set(4, 640) #cap.set(3, 640)
 cap.set(3, 480) #cap.set(4, 480)
@@ -27,8 +28,10 @@ while True:
         for box in boxes:
             b = box.xyxy[0]  # get box coordinates in (top, left, bottom, right) format
             c = box.cls
-            if model.names[int(c)] != 'laptop':
+            (up, left, down, right) = b.numpy().astype(int)
+            if model.names[int(c)] == 'person':
                 annotator.box_label(b, model.names[int(c)])
+                img[up:up+right, down:down+left, 1] = 200 #работает криво, надо фиксить
 
     img = annotator.result()
     cv2.imshow('YOhttps://habr.com/ru/articles/593547/LO V8 Detection', img)
