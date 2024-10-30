@@ -1,16 +1,14 @@
 from ultralytics import YOLO
 import cv2
 from ultralytics.utils.plotting import Annotator  # ultralytics.yolo.utils.plotting is deprecated
-#from pprint import pprint
-model = YOLO('yolov8n.pt') # x надо поменять на n, x много весит
 
-cap = cv2.VideoCapture(0)
+model = YOLO('yolov8n.pt')
+model2 = YOLO('best.pt')
 
-#pprint(model.names)
-#exit()
+cap = cv2.VideoCapture(1)
 
 cap.set(4, 640) #cap.set(3, 640)
-cap.set(3, 480) #cap.set(4, 480)
+cap.set(3, 480) #cap.set(4, 480)wц
 
 while True:
     _, img = cap.read()
@@ -19,26 +17,27 @@ while True:
     # BGR to RGB conversion is performed under the hood
     # see: https://github.com/ultralytics/ultralytics/issues/2575
     results = model.predict(img)
+    results2 = model2.predict(img)
+
+    annotator = Annotator(img)
 
     for r in results:
-
-        annotator = Annotator(img)
-
         boxes = r.boxes
         for box in boxes:
             b = box.xyxy[0]  # get box coordinates in (top, left, bottom, right) format
             c = box.cls
-            if model.names[int(c)] == 'person':
-                x1, y1, x2, y2 = map(int, b)
-                overlay = img.copy()
-                cv2.rectangle(overlay, (x1, y1), (x2, y2), (0, 255, 0), -1)
-                cv2.addWeighted(overlay, 0.4, img, 0.6, 0, img)
-            else:
-                annotator.box_label(b, model.names[int(c)])
+            annotator.box_label(b, model.names[int(c)])
 
-    #img = annotator.result()
+    for r in results2:
+        boxes = r.boxes
+        for box in boxes:
+            b = box.xyxy[0]  # get box coordinates in (top, left, bottom, right) format
+            c = box.cls
+            annotator.box_label(b, model2.names[int(c)])
+
+    img = annotator.result()
     cv2.imshow('YOhttps://habr.com/ru/articles/593547/LO V8 Detection', img)
-    #print(img)
+    print(img)
     if cv2.waitKey(1) & 0xFF == ord(' '):
         break
 
